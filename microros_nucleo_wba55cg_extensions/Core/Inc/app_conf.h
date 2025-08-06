@@ -296,7 +296,7 @@ typedef enum
  * Low power level(CFG_LPM_LEVEL) above 1 will disable LOG.
  * Standby low power mode(CFG_LPM_STDBY_SUPPORTED) above 0 will disable LOG.
  */
-#define CFG_LOG_SUPPORTED           (0U)
+#define CFG_LOG_SUPPORTED           (1U)
 
 extern UART_HandleTypeDef           huart1;
 #define LOG_UART_HANDLER            huart1
