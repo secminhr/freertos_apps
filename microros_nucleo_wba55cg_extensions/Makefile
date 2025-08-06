@@ -138,7 +138,7 @@ Middlewares/Third_Party/FreeRTOS/Source/timers.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/non_secure/port.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c \
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
-Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_2.c \
+Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
 lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_utils.c \
 lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_clock.c \
 lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_sched.c \

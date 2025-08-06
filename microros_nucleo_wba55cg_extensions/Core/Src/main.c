@@ -52,13 +52,6 @@ RTC_HandleTypeDef hrtc;
 
 UART_HandleTypeDef huart1;
 
-/* Definitions for defaultTask */
-// osThreadId_t defaultTaskHandle;
-// const osThreadAttr_t defaultTask_attributes = {
-//   .name = "defaultTask",
-//   .priority = (osPriority_t) osPriorityBelowNormal,
-//   .stack_size = 1500 * 4
-// };
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -67,10 +60,9 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void SystemPower_Config(void);
+void MX_FREERTOS_Init(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
-void StartDefaultTask(void *argument);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -128,33 +120,8 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();
-
-  /* USER CODE BEGIN RTOS_MUTEX */
+  /* Call init function for freertos objects (in app_freertos.c) */
   MX_FREERTOS_Init();
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-  /* creation of defaultTask */
-  // defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
 
   /* Initialize leds */
   BSP_LED_Init(LED_BLUE);
@@ -170,13 +137,14 @@ int main(void)
   /* Start scheduler */
   osKernelStart();
 
+  /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
 
     /* USER CODE END WHILE */
-    // MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
   }
@@ -572,24 +540,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-* @brief Function implementing the defaultTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartDefaultTask */
-// void StartDefaultTask(void *argument)
-// {
-//   /* USER CODE BEGIN defaultTask */
-//   /* Infinite loop */
-//   for(;;)
-//   {
-//     osDelay(1);
-//   }
-//   /* USER CODE END defaultTask */
-// }
 
 /**
   * @brief  Period elapsed callback in non blocking mode
