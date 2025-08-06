@@ -13,7 +13,7 @@
 ######################################
 # target
 ######################################
-TARGET = BleUros
+TARGET = micro-ROS
 
 
 ######################################
@@ -22,14 +22,23 @@ TARGET = BleUros
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+ifeq ($(DEBUG), 1)
+	OPT = -O0
+  	BUILD_TYPE = Debug
+else
+	OPT = -Og
+	BUILD_TYPE = Release
+endif
 
 
 #######################################
 # paths
 #######################################
 # Build path
-BUILD_DIR = build
+EXTENSIONS_DIR = $(shell pwd)
+TOPFOLDER = $(EXTENSIONS_DIR)/../..
+UROS_DIR = $(TOPFOLDER)/mcu_ws
+BUILD_DIR = $(EXTENSIONS_DIR)/build
 
 ######################################
 # source
@@ -138,7 +147,8 @@ Utilities/misc/stm32_tiny_vsnprintf.c \
 Utilities/tim_serv/stm32_timer.c \
 Utilities/lpm/tiny_lpm/stm32_lpm.c \
 Core/Src/sysmem.c \
-Core/Src/syscalls.c
+Core/Src/syscalls.c \
+$(wildcard $(UROS_APP_FOLDER)/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
@@ -155,19 +165,21 @@ ASMMC_SOURCE =
 #######################################
 # binaries
 #######################################
-PREFIX = toolchain/bin/arm-none-eabi-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
+CROSS_COMPILE_NAME_PREFIX=arm-none-eabi-
+CROSS_COMPILE = $(TOPFOLDER)/toolchain/bin/$(CROSS_COMPILE_NAME_PREFIX)
+
 ifdef GCC_PATH
-CC = $(GCC_PATH)/$(PREFIX)gcc
-AS = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
-CP = $(GCC_PATH)/$(PREFIX)objcopy
-SZ = $(GCC_PATH)/$(PREFIX)size
+CC = $(GCC_PATH)/$(CROSS_COMPILE_NAME_PREFIX)gcc
+AS = $(GCC_PATH)/$(CROSS_COMPILE_NAME_PREFIX)gcc -x assembler-with-cpp
+CP = $(GCC_PATH)/$(CROSS_COMPILE_NAME_PREFIX)objcopy
+SZ = $(GCC_PATH)/$(CROSS_COMPILE_NAME_PREFIX)size
 else
-CC = $(PREFIX)gcc
-AS = $(PREFIX)gcc -x assembler-with-cpp
-CP = $(PREFIX)objcopy
-SZ = $(PREFIX)size
+CC = $(CROSS_COMPILE)gcc
+AS = $(CROSS_COMPILE)gcc -x assembler-with-cpp
+CP = $(CROSS_COMPILE)objcopy
+SZ = $(CROSS_COMPILE)size
 endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
@@ -197,7 +209,8 @@ C_DEFS =  \
 -DBLE \
 -DUSE_NUCLEO_64 \
 -DUSE_HAL_DRIVER \
--DSTM32WBA55xx
+-DSTM32WBA55xx \
+-D_TIMEVAL_DEFINED
 
 
 # AS includes
@@ -243,13 +256,18 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include/ \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/non_secure/ \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ \
--IMiddlewares/Third_Party/CMSIS/RTOS2/Include/
+-IMiddlewares/Third_Party/CMSIS/RTOS2/Include/ \
+-I$(UROS_APP_FOLDER)
 
+MICROROS_INCLUDES += $(shell find $(UROS_DIR)/install -name 'include' | sed -E "s/(.*)/-I\1/")
+INCLUDE_ROS2_PACKAGES = $(shell cd $(UROS_DIR) && colcon list | awk '{print $$1}' | awk -v d=" " '{s=(NR==1?s:s d)$$0}END{print s}')
+MICROROS_INCLUDES += $(foreach pkg, $(INCLUDE_ROS2_PACKAGES), -I$(UROS_DIR)/install/$(pkg)/include/$(pkg))
+C_INCLUDES += $(MICROROS_INCLUDES)
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -258,6 +276,7 @@ endif
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
+ARCHCPUFLAGS = $(MCU) $(C_DEFS) $(OPT) -Wall -fdata-sections -ffunction-sections
 
 
 #######################################
@@ -280,10 +299,54 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 
 
 #######################################
+# build micro-ROS
+#######################################
+
+arm_toolchain: $(EXTENSIONS_DIR)/arm_toolchain.cmake.in
+	rm -f $(EXTENSIONS_DIR)/arm_toolchain.cmake; \
+	cat $(EXTENSIONS_DIR)/arm_toolchain.cmake.in | \
+		sed "s/@CROSS_COMPILE@/$(subst /,\/,$(CROSS_COMPILE))/g" | \
+		sed "s/@FREERTOS_TOPDIR@/$(subst /,\/,$(TOPFOLDER))/g" | \
+		sed "s/@ARCH_CPU_FLAGS@/\"$(ARCHCPUFLAGS)\"/g" | \
+		sed "s/@ARCH_OPT_FLAGS@/\"$(ARCHOPTIMIZATION)\"/g" \
+		> $(EXTENSIONS_DIR)/arm_toolchain.cmake
+
+colcon_compile: arm_toolchain
+	cd $(UROS_DIR); \
+	colcon build \
+		--packages-ignore-regex=.*_cpp \
+		--metas $(UROS_DIR)/colcon.meta $(UROS_APP_FOLDER)/app-colcon.meta \
+		--cmake-args \
+		"--no-warn-unused-cli" \
+		-DCMAKE_POSITION_INDEPENDENT_CODE=OFF \
+		-DTHIRDPARTY=ON \
+		-DBUILD_SHARED_LIBS=OFF \
+		-DBUILD_TESTING=OFF \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DCMAKE_TOOLCHAIN_FILE=$(EXTENSIONS_DIR)/arm_toolchain.cmake \
+		-DCMAKE_VERBOSE_MAKEFILE=ON; \
+
+libmicroros: colcon_compile
+	mkdir -p $(UROS_DIR)/libmicroros; cd $(UROS_DIR)/libmicroros; \
+	for file in $$(find $(UROS_DIR)/install/ -name '*.a'); do \
+		folder=$$(echo $$file | sed -E "s/(.+)\/(.+).a/\2/"); \
+		mkdir -p $$folder; cd $$folder; ar x $$file; \
+		for f in *; do \
+			mv $$f ../$$folder-$$f; \
+		done; \
+		cd ..; rm -rf $$folder; \
+	done ; \
+	ar rc libmicroros.a *.obj; mkdir -p $(BUILD_DIR); cp libmicroros.a $(BUILD_DIR); ranlib $(BUILD_DIR)/libmicroros.a; \
+	cd ..; rm -rf libmicroros;
+
+
+#######################################
 # build the application
 #######################################
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
+OBJECTS += $(BUILD_DIR)/libmicroros.a
+
 vpath %.c $(sort $(dir $(C_SOURCES)))
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
