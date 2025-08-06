@@ -139,6 +139,11 @@ Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/non_secure/por
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c \
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_2.c \
+lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_utils.c \
+lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_clock.c \
+lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_sched.c \
+lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_unistd.c \
+lib/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_pthread.c \
 Utilities/trace/adv_trace/stm32_adv_trace.c \
 Utilities/misc/stm32_mem.c \
 Utilities/misc/stm32_systime.c \
@@ -257,6 +262,11 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/non_secure/ \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ \
 -IMiddlewares/Third_Party/CMSIS/RTOS2/Include/ \
+-Ilib/FreeRTOS-Plus-POSIX/include \
+-Ilib/FreeRTOS-Plus-POSIX/include/portable/empty_portable \
+-Ilib/FreeRTOS-Plus-POSIX/include/portable \
+-Ilib/include \
+-Ilib/include/private \
 -I$(UROS_APP_FOLDER)
 
 MICROROS_INCLUDES += $(shell find $(UROS_DIR)/install -name 'include' | sed -E "s/(.*)/-I\1/")
