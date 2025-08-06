@@ -53,12 +53,12 @@ RTC_HandleTypeDef hrtc;
 UART_HandleTypeDef huart1;
 
 /* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityBelowNormal,
-  .stack_size = 1500 * 4
-};
+// osThreadId_t defaultTaskHandle;
+// const osThreadAttr_t defaultTask_attributes = {
+//   .name = "defaultTask",
+//   .priority = (osPriority_t) osPriorityBelowNormal,
+//   .stack_size = 1500 * 4
+// };
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -130,6 +130,7 @@ int main(void)
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_MUTEX */
+  MX_FREERTOS_Init();
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
@@ -145,7 +146,7 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  // defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -175,7 +176,7 @@ int main(void)
   {
 
     /* USER CODE END WHILE */
-    MX_APPE_Process();
+    // MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
   }
@@ -579,16 +580,16 @@ static void MX_GPIO_Init(void)
 * @retval None
 */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN defaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END defaultTask */
-}
+// void StartDefaultTask(void *argument)
+// {
+//   /* USER CODE BEGIN defaultTask */
+//   /* Infinite loop */
+//   for(;;)
+//   {
+//     osDelay(1);
+//   }
+//   /* USER CODE END defaultTask */
+// }
 
 /**
   * @brief  Period elapsed callback in non blocking mode
