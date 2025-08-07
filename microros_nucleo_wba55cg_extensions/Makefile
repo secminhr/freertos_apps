@@ -116,7 +116,6 @@ Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_hal_rng_ex.c \
 Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_hal_rtc.c \
 Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_hal_rtc_ex.c \
 Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_ll_tim.c \
-Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_ll_dma.c \
 Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_hal_uart.c \
 Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_hal_uart_ex.c \
 Drivers/STM32WBAxx_HAL_Driver/Src/stm32wbaxx_ll_adc.c \

@@ -54,6 +54,8 @@ void UsageFault_Handler(void);
 void DebugMon_Handler(void);
 void RTC_IRQHandler(void);
 void RCC_IRQHandler(void);
+void GPDMA1_Channel0_IRQHandler(void);
+void GPDMA1_Channel1_IRQHandler(void);
 void TIM1_UP_IRQHandler(void);
 void TIM16_IRQHandler(void);
 void RADIO_IRQHandler(void);

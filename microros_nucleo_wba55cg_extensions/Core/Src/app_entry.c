@@ -405,6 +405,7 @@ static void System_Init( void )
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN7_HIGH_3);
 
 #if (CFG_LOG_SUPPORTED != 0)
+  MX_USART1_UART_Init();
 
   /* Initialize the logs ( using the USART ) */
   Log_Module_Init( Log_Module_Config );

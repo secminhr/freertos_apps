@@ -35,6 +35,7 @@
 /* External variables --------------------------------------------------------*/
 extern RAMCFG_HandleTypeDef hramcfg_SRAM1;
 extern RNG_HandleTypeDef hrng;
+extern UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN EV */
 
@@ -94,9 +95,15 @@ void MX_StandbyExit_PeripheralInit(void)
 #endif /* CFG_DEBUGGER_LEVEL */
 
   memset(&hramcfg_SRAM1, 0, sizeof(hramcfg_SRAM1));
+#if (CFG_LOG_SUPPORTED == 1)
+  memset(&huart1, 0, sizeof(huart1));
+#endif
 
   MX_ICACHE_Init();
   MX_RAMCFG_Init();
+#if (CFG_LOG_SUPPORTED == 1)
+  MX_USART1_UART_Init();
+#endif
 #if (USE_TEMPERATURE_BASED_RADIO_CALIBRATION == 1)
   ADCCTRL_Init();
 #endif /* USE_TEMPERATURE_BASED_RADIO_CALIBRATION */
