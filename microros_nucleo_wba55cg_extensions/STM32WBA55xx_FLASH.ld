@@ -225,6 +225,12 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
+  .freertos_heap (NOLOAD) :
+  {
+    . = ALIGN(8);
+    KEEP(*(.freertos_heap))
+  } >RAM2
+
   /* Remove information from the compiler libraries */
   /DISCARD/ :
   {
